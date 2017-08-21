@@ -76,7 +76,7 @@ public class WebDriverFactory {
   protected WebDriver createRemoteDriver(String remote, String browser, Proxy proxy) {
     try {
       DesiredCapabilities capabilities = createCommonCapabilities(proxy);
-      capabilities.setBrowserName(browser);
+      capabilities.setBrowserName(isIE() ? INTERNET_EXPLORER : browser);
       return new RemoteWebDriver(new URL(remote), capabilities);
     } catch (MalformedURLException e) {
       throw new IllegalArgumentException("Invalid 'remote' parameter: " + remote, e);
@@ -202,8 +202,8 @@ public class WebDriverFactory {
 
     DesiredCapabilities capabilities = createCommonCapabilities(proxy);
     myProfile = transferFirefoxProfileFromSystemProperties(myProfile, "firefoxprofile.");
-    capabilities.setCapability(FirefoxDriver.PROFILE, myProfile);
     capabilities.setCapability("marionette", false);
+    capabilities.setCapability(FirefoxDriver.PROFILE, myProfile);
     return capabilities;
   }
 

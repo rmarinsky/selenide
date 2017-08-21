@@ -42,6 +42,7 @@ public class Commands {
     add("getWrappedElement", new GetWrappedElement());
     add("screenshot", new TakeScreenshot());
     add("screenshotAsImage", new TakeScreenshotAsImage());
+    add("getSearchCriteria", new GetSearchCriteria());
   }
 
   private void addActionsCommands() {
@@ -84,8 +85,10 @@ public class Commands {
   private void addFindCommands() {
     add("find", new Find());
     add("$", new Find());
+    add("$x", new FindByXpath());
     add("findAll", new FindAll());
     add("$$", new FindAll());
+    add("$$x", new FindAllByXpath());
     add("closest", new GetClosest());
     add("parent", new GetParent());
   }

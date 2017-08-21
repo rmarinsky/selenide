@@ -12,6 +12,7 @@ import com.codeborne.selenide.logevents.LogEventListener;
 import com.codeborne.selenide.logevents.SelenideLogger;
 import com.google.common.collect.ImmutableMap;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.*;
@@ -59,10 +60,20 @@ public class SelenideElementProxyTest {
     when(element.getText()).thenReturn("Hello world");
     when(element.isDisplayed()).thenReturn(true);
   }
-  
+
+  @After
+  public void tearDown() {
+    WebDriverRunner.closeWebDriver();
+  }
+
   @After
   public void after() {
     SelenideLogger.removeListener("test");
+  }
+
+  @AfterClass
+  public static void restoreOldValues() {
+    Configuration.screenshots = true;
   }
 
   @Test

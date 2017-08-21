@@ -20,7 +20,7 @@ apply plugin: 'de.undercouch.download'
 
 group='com.codeborne'
 archivesBaseName = 'selenide'
-version='4.5-SNAPSHOT'
+version='4.6-SNAPSHOT'
 
 [compileJava, compileTestJava]*.options.collect {options -> options.encoding = 'UTF-8'}
 [compileJava, compileTestJava]*.options.collect {options -> options.debug = true}
@@ -51,38 +51,48 @@ dependencies {
     exclude group: 'com.google.code.gson', module: 'gson'
     exclude group: 'org.apache.httpcomponents', module: 'httpcore'
     exclude group: 'com.codeborne', module: 'phantomjsdriver'
+    exclude group: 'net.sourceforge.htmlunit', module: 'htmlunit'
+    exclude group: 'org.seleniumhq.selenium', module: 'htmlunit-driver'
   }
-  runtime group: 'com.codeborne', name: 'phantomjsdriver', version: '1.4.2', transitive: false
+  runtime group: 'com.codeborne', name: 'phantomjsdriver', version: '1.4.3', transitive: false
   compile 'com.google.code.gson:gson:2.8.0'
   compile 'com.google.guava:guava:21.0'
   runtime 'commons-codec:commons-codec:1.10'
   provided group: 'org.seleniumhq.selenium', name: 'htmlunit-driver', version: '2.24', transitive: false
   provided group: 'net.sourceforge.htmlunit', name: 'htmlunit', version: '2.24', transitive: false
   testRuntime group: 'net.sourceforge.htmlunit', name: 'htmlunit', version: '2.24', transitive: false
-  compile group: 'net.lightbody.bmp', name: 'browsermob-core', version: '2.1.4'
+  compile('net.lightbody.bmp:browsermob-core:2.1.4') {
+    exclude group: 'net.lightbody.bmp', module: 'littleproxy'
+  }
+  compile group: 'org.littleshoot', name: 'littleproxy', version: '1.1.2'
   testRuntime group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.25', transitive: false
 
   provided 'junit:junit:4.12'
   provided 'org.testng:testng:6.9.10'
   
-  testCompile group: 'org.seleniumhq.selenium', name: 'selenium-server', version: '3.4.0'  
-  testCompile 'org.mockito:mockito-core:2.7.17'
-  testCompile 'org.eclipse.jetty:jetty-server:9.4.2.v20170220'
-  testCompile 'org.eclipse.jetty:jetty-servlet:9.4.2.v20170220'
+  testCompile group: 'org.seleniumhq.selenium', name: 'selenium-server', version: '3.4.0', transitive: false
+  testCompile 'org.mockito:mockito-core:2.8.9'
+  testCompile 'org.seleniumhq.selenium:jetty-repacked:9.4.5.v20170502'
+  testCompile 'org.eclipse.jetty:jetty-server:9.4.5.v20170502'
+  testCompile 'org.eclipse.jetty:jetty-servlet:9.4.5.v20170502'
   testCompile 'commons-fileupload:commons-fileupload:1.3.2'
   
-  testCompile 'com.automation-remarks:video-recorder-core:1.4'
-  testCompile 'com.automation-remarks:video-recorder-junit:1.4'
+  testCompile 'com.automation-remarks:video-recorder-core:1.4.1'
+  testCompile 'com.automation-remarks:video-recorder-junit:1.4.1'
 }
 
-task libs(type: Sync) {
+task libsProd(type: Sync) {
   from configurations.compile
   from configurations.runtime
-  from configurations.testRuntime
-  into "$buildDir/lib"
+  into "$buildDir/lib-prod"
 }
 
-compileJava.dependsOn libs
+task libsTest(type: Sync) {
+  from configurations.testRuntime
+  into "$buildDir/lib-test"
+}
+
+compileJava.dependsOn libsProd, libsTest
 
 findbugs {
   toolVersion = "3.0.1"
@@ -127,7 +137,7 @@ jacocoTestReport {
     xml.enabled true
     csv.enabled false
     html.enabled true
-    html.destination "${buildDir}/reports/jacocoHtml"
+    html.destination file("${buildDir}/reports/jacocoHtml")
   }
   executionData = files(
     file("$project.buildDir/jacoco/test.exec"), 
@@ -223,13 +233,13 @@ import org.gradle.internal.os.OperatingSystem;
 
 task downloadChromeDriverZip(type: Download) {
   if (OperatingSystem.current().isMacOsX()) {
-    src 'http://chromedriver.storage.googleapis.com/2.29/chromedriver_mac64.zip'
+    src 'http://chromedriver.storage.googleapis.com/2.31/chromedriver_mac64.zip'
   }
   else if (OperatingSystem.current().isLinux()) {
-    src 'http://chromedriver.storage.googleapis.com/2.29/chromedriver_linux64.zip'
+    src 'http://chromedriver.storage.googleapis.com/2.31/chromedriver_linux64.zip'
   }
   else {
-    src 'http://chromedriver.storage.googleapis.com/2.29/chromedriver_win32.zip'
+    src 'http://chromedriver.storage.googleapis.com/2.31/chromedriver_win32.zip'
   }
   dest new File(buildDir, 'chromedriver.zip')
   quiet true
@@ -287,15 +297,15 @@ task firefox(type: Test) {
 
 task downloadGeckoDriverZip(type: Download) {
   if (OperatingSystem.current().isMacOsX()) {
-    src 'https://github.com/mozilla/geckodriver/releases/download/v0.14.0/geckodriver-v0.14.0-macos.tar.gz'
+    src 'https://github.com/mozilla/geckodriver/releases/download/v0.17.0/geckodriver-v0.17.0-macos.tar.gz'
     dest new File(buildDir, 'geckodriver.tar.gz')
   }
   else if (OperatingSystem.current().isLinux()) {
-    src 'https://github.com/mozilla/geckodriver/releases/download/v0.14.0/geckodriver-v0.14.0-linux64.tar.gz'
+    src 'https://github.com/mozilla/geckodriver/releases/download/v0.17.0/geckodriver-v0.17.0-linux64.tar.gz'
     dest new File(buildDir, 'geckodriver.tar.gz')
   }
   else {
-    src 'https://github.com/mozilla/geckodriver/releases/download/v0.14.0/geckodriver-v0.14.0-win64.zip'
+    src 'https://github.com/mozilla/geckodriver/releases/download/v0.17.0/geckodriver-v0.17.0-win64.zip'
     dest new File(buildDir, 'geckodriver.zip')
   }
 
@@ -336,6 +346,12 @@ task marionette(type: Test, dependsOn: downloadAndUnzipGeckoDriver) {
 task jbrowser(type: Test) {
   systemProperties['selenide.browser'] = 'jbrowser'
   include 'integration/**/*'
+  exclude 'com/codeborne/selenide/**/*'
+}
+
+task grid(type: Test) {
+  systemProperties['selenide.browser'] = 'htmlunit'
+  include 'grid/**/*'
   exclude 'com/codeborne/selenide/**/*'
 }
 
@@ -389,7 +405,7 @@ artifacts {
 }
 
 task wrapper(type: Wrapper) {
-  gradleVersion = '3.4.1'
+  gradleVersion = '4.1'
   jarFile = './gradle-wrapper/gradle-wrapper.jar'
   scriptFile = './gradle'
 }

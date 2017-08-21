@@ -9,7 +9,6 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.InvalidSelectorException;
 
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.ListIterator;
 
@@ -18,6 +17,7 @@ import static com.codeborne.selenide.CollectionCondition.*;
 import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.Selectors.byText;
 import static com.codeborne.selenide.Selenide.*;
+import static java.util.Arrays.asList;
 import static org.junit.Assert.*;
 
 public class CollectionMethodsTest extends IntegrationTest {
@@ -83,7 +83,7 @@ public class CollectionMethodsTest extends IntegrationTest {
     $$("#dynamic-content-container span").shouldHave(
         texts("dynamic content", "dynamic content2"),
         texts("mic cont", "content2"),
-        exactTexts(Arrays.asList("dynamic content", "dynamic content2")));
+        exactTexts(asList("dynamic content", "dynamic content2")));
   }
 
   @Test
@@ -134,6 +134,14 @@ public class CollectionMethodsTest extends IntegrationTest {
   }
 
   @Test
+  public void errorMessageShouldShow_whichElementInChainWasNotFound() {
+    thrown.expect(ElementNotFound.class);
+    thrown.expectMessage("Element not found {#multirowTable.findBy(text 'INVALID-TEXT')}");
+    
+    $$("#multirowTable").findBy(text("INVALID-TEXT")).findAll("valid-selector").shouldHave(texts("foo bar"));
+  }
+
+  @Test
   public void userCanFindMatchingElementFromList() {
     $$("#multirowTable tr").findBy(text("Norris")).shouldHave(text("Norris"));
   }
@@ -152,7 +160,7 @@ public class CollectionMethodsTest extends IntegrationTest {
 
   @Test
   public void shouldMethodsCanCheckMultipleConditions() {
-    $$("#multirowTable tr td").shouldHave(size(4), texts(Arrays.asList("Chack", "Norris", "Chack", "L'a Baskerville")));
+    $$("#multirowTable tr td").shouldHave(size(4), texts(asList("Chack", "Norris", "Chack", "L'a Baskerville")));
   }
 
   @Test
