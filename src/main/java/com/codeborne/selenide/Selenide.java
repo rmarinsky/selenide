@@ -529,6 +529,45 @@ public class Selenide {
     return null;
   }
 
+  /**
+   * Accept (Click "Yes" or "Ok") in the confirmation dialog (javascript 'prompt').
+   * @return actual dialog text
+   */
+  public static String prompt() {
+    return prompt(null, null);
+  }
+
+  /**
+   * Accept (Click "Yes" or "Ok") in the confirmation dialog (javascript 'prompt').
+   * @param inputText if not null, sets value in prompt dialog input
+   * @return actual dialog text
+   */
+  public static String prompt(String inputText) {
+    return prompt(null, inputText);
+  }
+
+  /**
+   * Accept (Click "Yes" or "Ok") in the confirmation dialog (javascript 'prompt').
+   * Method does nothing in case of HtmlUnit browser (since HtmlUnit does not support alerts).
+   *
+   * @param expectedDialogText if not null, check that confirmation dialog displays this message (case-sensitive)
+   * @param inputText if not null, sets value in prompt dialog input
+   * @throws DialogTextMismatch if confirmation message differs from expected message
+   * @return actual dialog text
+   */
+  public static String prompt(String expectedDialogText, String inputText) {
+    if (!doDismissModalDialogs()) {
+      Alert alert = switchTo().alert();
+      String actualDialogText = alert.getText();
+      if (inputText != null)
+        alert.sendKeys(inputText);
+      alert.accept();
+      checkDialogText(expectedDialogText, actualDialogText);
+      return actualDialogText;
+    }
+    return null;
+  }
+
 
   /**
    * Dismiss (click "No" or "Cancel") in the confirmation dialog (javascript 'alert' or 'confirm').
